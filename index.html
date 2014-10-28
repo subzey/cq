@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<script>
+(function(){
+	var setImmediate = window.setImmediate || function(arg){
+		setTimeout(arg, 0);
+	}
+
+	var map = [
+		[
+			{wall: true},
+			{wall: true, msg: "A river is ahead. I can swim, but water is so wet!"},
+			{wall: true, msg: "A river is ahead. I can swim, but water is so cold!"},
+			{wall: true, msg: "Narrow wooden bridge is ahead. I was used by merchants before, but it's broken"},
+			{wall: true}
+		],
+		[
+			{wall: true, msg: "There's a long road ahead throgh the forest. It's dark and scary."},
+			{msg: "An empty street between old houses. I used to walk here, just like now."},
+			{msg: "A quiet place outside, almost no one here. There's a post box, sign nearby reads: Elm street."},
+			{msg: "Forge street, a well known place for everyone that want take a couple of drinks. There's two taverns, crowded and noisy."},
+			{wall: true, msg: "There's a local market. It's an unsafe place, pickpockets are known to be there. And it's crowded there. I'm afraid of crowds."},
+		],
+		[
+			{wall: true, msg: "There's nothing there except stone wall several meters high"},
+			{msg: "I'm in old man's drug store named \"Drugheart and sons\". I'd buy something, but I don't need anything."},
+			{msg: "I am at home."},
+			{msg: "A forgery. Blacksmiths are at work."},
+			{wall: true, msg: "There's a wall, I cannot go through the walls"},
+		],
+		[
+			{wall: true},
+			{wall: true, msg: "There's a locked door."},
+			{wall: true, msg: "There's a wall, my house is not very big."},
+			{wall: true, msg: "I cannot pass there."},
+			{wall: true},
+		]
+	]
+
+	var positionX = 2;
+	var positionY = 2;
+
+	function getCell(x, y){
+		return (map[y] || [])[x] || {wall: true};
+	}
+
+	function describe(){
+		var cell = getCell(positionX, positionY);
+		var moves = [
+			[0, -1, 'north'],
+			[0, +1, 'south'],
+			[-1, 0, 'west'],
+			[+1, 0, 'east'],
+		].filter(function(d){
+			if (getCell(positionX + d[0], positionY + d[1]).wall){
+				return false;
+			}
+			return true;
+		}).map(function(d){
+			return d[2];
+		});
+		setImmediate(function(){
+			console.log(cell.msg || "There's nothing too special here");
+			console.debug('I can go ' + moves.join(', '));
+		});
+		return "I am looking around...";
+	}
+
+
+	function move(dx, dy){
+		var targetX = positionX + dx;
+		var targetY = positionY + dy;
+		var cell = getCell(targetX, targetY);
+		if (cell.wall){
+			setImmediate(function(){
+				console.log(cell.msg || "I cannot go there");
+			});
+			return false;
+		} else {
+			positionX = targetX;
+			positionY = targetY;
+			describe();
+			return true;
+		}
+
+		return passed;
+	}
+
+	function goNorth(){
+		if (move(0, -1)){
+			return "I am heading north...";
+		} else {
+			return "I cannot go to the north...";
+		}
+	}
+	function goSouth(){
+		if (move(0, +1)){
+			return "I am heading south...";
+		} else {
+			return "I cannot go to the south...";
+		}
+	}
+	function goWest(){
+		if (move(-1, 0)){
+			return "I am heading west...";
+		} else {
+			return "I cannot go to the west...";
+		}
+	}
+	function goEast(){
+		if (move(+1, 0)){
+			return "I am heading east...";
+		} else {
+			return "I cannot go to the east...";
+		}
+	}
+	function help(){
+		setImmediate(function(){
+			console.debug([
+				'Welcome to the Console Quest!',
+				'Available commands:',
+				'\tn\tMove north',
+				'\ts\tMove south',
+				'\te\tMove east',
+				'\tw\tMove west',
+				'\tl\tLook around',
+				'\thelp\tShow this help'
+			].join('\n'))
+		});
+		return "Show me the help!";
+	}
+
+	Object.defineProperties(window, {
+		n: {get: goNorth},
+		s: {get: goSouth},
+		w: {get: goWest},
+		e: {get: goEast},
+		l: {get: describe},
+		help: {get: help}
+	});
+
+	help();
+})();
+</script>
